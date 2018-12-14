@@ -4098,7 +4098,7 @@ struct BuildTokenTest : public BuildTest {
   void ExpectWaitForCommand(int count, ...);
 
 private:
-  void EnqueueBooleans(vector<bool>& booleans, int count, va_list ao);
+  void EnqueueBooleans(vector<bool>& booleans, int count, va_list ap);
 };
 
 void BuildTokenTest::SetUp() {
@@ -4142,16 +4142,6 @@ void BuildTokenTest::EnqueueBooleans(vector<bool>& booleans, int count, va_list 
     int value = va_arg(ap, int);
     booleans.push_back(!!value); // force bool
   }
-}
-
-TEST_F(BuildTokenTest, CompleteNoWork) {
-  // plan should not execute anything
-  string err;
-
-  EXPECT_TRUE(builder_.Build(&err));
-  EXPECT_EQ("", err);
-
-  EXPECT_EQ(0u, token_command_runner_.commands_ran_.size());
 }
 
 TEST_F(BuildTokenTest, DoNotAquireToken) {
