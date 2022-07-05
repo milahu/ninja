@@ -56,6 +56,7 @@ struct Subprocess {
   // 31 bytes + \0
   // '1234567890123456789012345678901'
   // 'pid xxxxxxxxxxxx: '
+  char** line_prefix_ptr;
 
  private:
   Subprocess(bool use_console);
