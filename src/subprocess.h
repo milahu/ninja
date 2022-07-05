@@ -54,10 +54,11 @@ struct Subprocess {
   Subprocess(bool use_console);
   bool Start(struct SubprocessSet* set, const std::string& command);
   void OnPipeReady();
+  void OnPipeReadyBuf(char *buf, size_t buf_len, size_t *len);
 
   std::string buf_;
 
-  char line_prefix_[32];
+  char line_prefix[32];
   // 31 bytes + \0
   // '1234567890123456789012345678901'
   // 'pid xxxxxxxxxxxx: '

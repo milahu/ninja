@@ -131,7 +131,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   if (err != 0)
     Fatal("posix_spawn_file_actions_destroy: %s", strerror(err));
 
-  assert(snprintf(line_prefix_, 32, "pid %d: ", pid_) < 32);
+  assert(snprintf(line_prefix, 32, "pid %d: ", pid_) < 32);
 
   close(output_pipe[1]);
   return true;
@@ -142,7 +142,20 @@ void Subprocess::OnPipeReady() {
   ssize_t len = read(fd_, buf, sizeof(buf));
   if (len > 0) {
     buf_.append(buf, len);
-    SubprocessOutput(line_prefix_, buf, len);
+    //SubprocessOutput(line_prefix, buf, len); // wrong.
+  } else {
+    if (len < 0)
+      Fatal("read: %s", strerror(errno));
+    close(fd_);
+    fd_ = -1;
+  }
+}
+
+void Subprocess::OnPipeReadyBuf(char *buf, size_t buf_len, size_t *len) {
+  ssize_t len = read(fd_, buf, buf_len);
+  if (len > 0) {
+    buf_.append(buf, len);
+    //SubprocessOutput(line_prefix, buf, len); // wrong. prints garbage
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));
@@ -185,6 +198,10 @@ bool Subprocess::Done() const {
 }
 
 const string& Subprocess::GetOutput() const {
+  return buf_;
+}
+
+const string& Subprocess::GetLiveOutput() const {
   return buf_;
 }
 
@@ -295,7 +312,13 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       continue;
     assert(fd == fds[cur_nfd].fd);
     if (fds[cur_nfd++].revents) {
-      (*i)->OnPipeReady();
+      //(*i)->OnPipeReady();
+      // TODO live output?
+      char buf[4 << 10];
+      size_t len = 0;
+      (*i)->OnPipeReadyBuf(&buf, sizeof(buf), &len);
+      SubprocessOutput((*i)->line_prefix, buf, len); // TODO test
+
       if ((*i)->Done()) {
         finished_.push(*i);
         i = running_.erase(i);
