@@ -133,6 +133,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
     Fatal("posix_spawn_file_actions_destroy: %s", strerror(err));
 
   assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
+  fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
 
   close(output_pipe[1]);
   return true;
@@ -143,8 +144,9 @@ void Subprocess::OnPipeReady() {
   ssize_t len = read(fd_, buf, sizeof(buf));
   if (len > 0) {
     buf_.append(buf, len);
-    //SubprocessOutput(line_prefix, buf, len); // wrong.
-    SubprocessOutput("ninja child 1234: ", buf, len); // wrong.
+    fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix);
+    //SubprocessOutput(line_prefix, buf, len); // bug in line_prefix
+    SubprocessOutput("ninja child 1234: ", buf, len); // ok
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));
@@ -278,6 +280,8 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
   vector<pollfd> fds;
   nfds_t nfds = 0;
 
+  fprintf(stderr, "Subprocess::DoWork\n");
+
   for (vector<Subprocess*>::iterator i = running_.begin();
        i != running_.end(); ++i) {
     int fd = (*i)->fd_;
@@ -288,11 +292,15 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     ++nfds;
   }
 
+  fprintf(stderr, "Subprocess::DoWork 2\n");
+
   if (tokens) {
     pollfd pfd = { tokens->GetMonitorFd(), POLLIN | POLLPRI, 0 };
     fds.push_back(pfd);
     ++nfds;
   }
+
+  fprintf(stderr, "Subprocess::DoWork 3\n");
 
   interrupted_ = 0;
   int ret = ppoll(&fds.front(), nfds, NULL, &old_mask_);
@@ -304,9 +312,13 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     return IsInterrupted();
   }
 
+  fprintf(stderr, "Subprocess::DoWork 4\n");
+
   HandlePendingInterruption();
   if (IsInterrupted())
     return true;
+
+  fprintf(stderr, "Subprocess::DoWork 5\n");
 
   nfds_t cur_nfd = 0;
   for (vector<Subprocess*>::iterator i = running_.begin();
@@ -338,6 +350,8 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     ++i;
   }
 
+  fprintf(stderr, "Subprocess::DoWork 6\n");
+
   if (tokens) {
     pollfd *pfd = &fds[nfds - 1];
     if (pfd->fd >= 0) {
@@ -346,6 +360,8 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
         token_available_ = true;
     }
   }
+
+  fprintf(stderr, "Subprocess::DoWork 7\n");
 
   return IsInterrupted();
 }
