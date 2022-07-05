@@ -132,7 +132,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   if (err != 0)
     Fatal("posix_spawn_file_actions_destroy: %s", strerror(err));
 
-  assert(snprintf(line_prefix, 32, "pid %d: ", pid_) < 32);
+  assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
 
   close(output_pipe[1]);
   return true;

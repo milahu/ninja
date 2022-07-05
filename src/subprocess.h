@@ -35,6 +35,8 @@
 
 #include "exit_status.h"
 
+#define SUBPROCESS_LINE_PREFIX_SIZE 1024
+
 /// Subprocess wraps a single async subprocess.  It is entirely
 /// passive: it expects the caller to notify it when its fds are ready
 /// for reading, as well as call Finish() to reap the child once done()
@@ -58,7 +60,7 @@ struct Subprocess {
 
   std::string buf_;
 
-  char line_prefix[32];
+  char line_prefix[SUBPROCESS_LINE_PREFIX_SIZE];
   // 31 bytes + \0
   // '1234567890123456789012345678901'
   // 'pid xxxxxxxxxxxx: '
