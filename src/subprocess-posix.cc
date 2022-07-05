@@ -131,6 +131,8 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   if (err != 0)
     Fatal("posix_spawn_file_actions_destroy: %s", strerror(err));
 
+  assert(snprintf(line_prefix_, 32, "pid %d: ", pid_) < 32);
+
   close(output_pipe[1]);
   return true;
 }
@@ -140,6 +142,7 @@ void Subprocess::OnPipeReady() {
   ssize_t len = read(fd_, buf, sizeof(buf));
   if (len > 0) {
     buf_.append(buf, len);
+    SubprocessOutput(line_prefix_, buf, len);
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));

@@ -61,6 +61,9 @@ void Error(const char* msg, va_list ap);
 void Info(const char* msg, ...);
 void Info(const char* msg, va_list ap);
 
+/// Log live output of subprocess.
+void SubprocessOutput(const char* line_prefix, const char* buf, size_t len);
+
 /// Canonicalize a path like "foo/../bar.h" into just "bar.h".
 /// |slash_bits| has bits set starting from lowest for a backslash that was
 /// normalized to a forward slash. (only used on Windows)

@@ -57,6 +57,11 @@ struct Subprocess {
 
   std::string buf_;
 
+  char line_prefix_[32];
+  // 31 bytes + \0
+  // '1234567890123456789012345678901'
+  // 'pid xxxxxxxxxxxx: '
+
 #ifdef _WIN32
   /// Set up pipe_ as the parent-side pipe of the subprocess; return the
   /// other end of the pipe, usable in the child process.
