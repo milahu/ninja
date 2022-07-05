@@ -152,7 +152,8 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   //fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
 
   line_prefix_ptr = (char*) malloc(SUBPROCESS_LINE_PREFIX_SIZE);
-  bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "ninja worker %d: ", pid_);
+  //bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "ninja worker %d: ", pid_);
+  bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
   //fprintf(stderr, "Subprocess::Start: bytes_written ptr = %i\n", bytes_written);
   //fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", line_prefix_ptr);
 
