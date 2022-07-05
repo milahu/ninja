@@ -540,6 +540,7 @@ bool RealCommandRunner::WaitForCommand(Result* result, bool more_ready) {
   while (((subproc = subprocs_.NextFinished()) == NULL) &&
          !subprocs_.IsTokenAvailable()) {
     bool interrupted = subprocs_.DoWork(more_ready ? tokens_ : NULL);
+    //GetLiveOutput(); // TODO?
     if (interrupted)
       return false;
   }

@@ -116,16 +116,16 @@ void Info(const char* msg, ...) {
   va_end(ap);
 }
 
-void SubprocessOutput(const char* line_prefix, const char* buf, size_t len) {
+void SubprocessOutput(const char* line_prefix, const char** buf, size_t len) {
   if (len == 0) return;
   puts(line_prefix);
   for (size_t i = 0; i < len; i++) {
-    putchar(buf[i]);
-    if (buf[i] == '\n') {
+    putchar(*buf[i]);
+    if (*buf[i] == '\n') {
       puts(line_prefix);
     }
   }
-  if (buf[(len - 1)] != '\n') putchar('\n');
+  if (*buf[(len - 1)] != '\n') putchar('\n');
 }
 
 void CanonicalizePath(string* path, uint64_t* slash_bits) {

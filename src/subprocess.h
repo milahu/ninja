@@ -54,7 +54,7 @@ struct Subprocess {
   Subprocess(bool use_console);
   bool Start(struct SubprocessSet* set, const std::string& command);
   void OnPipeReady();
-  void OnPipeReadyBuf(char *buf, size_t buf_len, size_t *len);
+  void OnPipeReadyBuf(char** buf, size_t buf_size, size_t* len);
 
   std::string buf_;
 

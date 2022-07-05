@@ -24,6 +24,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <spawn.h>
+#include <stdlib.h>
 
 #if defined(USE_PPOLL)
 #include <poll.h>
@@ -151,11 +152,10 @@ void Subprocess::OnPipeReady() {
   }
 }
 
-void Subprocess::OnPipeReadyBuf(char **buf, size_t buf_len, size_t *len) {
-  *len = read(fd_, *buf, buf_len);
+void Subprocess::OnPipeReadyBuf(char** buf, size_t buf_size, size_t* len) {
+  *len = read(fd_, *buf, buf_size);
   if (*len > 0) {
     buf_.append(*buf, *len);
-    //SubprocessOutput(line_prefix, *buf, *len); // wrong. prints garbage
   } else {
     if (*len < 0)
       Fatal("read: %s", strerror(errno));
@@ -314,10 +314,14 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     if (fds[cur_nfd++].revents) {
       //(*i)->OnPipeReady();
       // TODO live output?
-      char buf[4 << 10];
+      char *buf;
+      const size_t buf_size = 4 << 10;
+      buf = malloc(buf_size);
       size_t len = 0;
-      (*i)->OnPipeReadyBuf(&buf, sizeof(buf), &len);
+      (*i)->OnPipeReadyBuf(&buf, buf_size, &len);
       SubprocessOutput((*i)->line_prefix, buf, len); // TODO test
+      free(buf);
+      buf = NULL;
 
       if ((*i)->Done()) {
         finished_.push(*i);
