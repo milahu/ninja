@@ -145,7 +145,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   //fprintf(stderr, "Subprocess::Start: bytes_written ptr = %i\n", bytes_written);
   //fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", line_prefix_ptr);
 
-  fprintf(stderr, "ninja worker %i: starting\n", pid_);
+  //fprintf(stderr, "ninja worker %i: starting\n", pid_);
 
   close(output_pipe[1]); // TODO(milahu) what is closed here?
   return true;
@@ -155,7 +155,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
 void Subprocess::OnPipeReady() {
   char buf[4 << 10];
   ssize_t len = read(fd_, buf, sizeof(buf));
-  fprintf(stderr, "Subprocess::OnPipeReady: len = %li\n", len);
+  //fprintf(stderr, "Subprocess::OnPipeReady: len = %li\n", len);
   if (len > 0) {
     buf_.append(buf, len);
     //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix); // ok
