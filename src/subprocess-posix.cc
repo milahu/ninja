@@ -152,10 +152,10 @@ void Subprocess::OnPipeReady() {
   }
 }
 
-void Subprocess::OnPipeReadyBuf(char** buf, size_t buf_size, ssize_t* len) {
-  *len = read(fd_, *buf, buf_size);
+void Subprocess::OnPipeReadyBuf(char* buf, size_t buf_size, ssize_t* len) {
+  *len = read(fd_, buf, buf_size);
   if (*len > 0) {
-    buf_.append(*buf, *len);
+    buf_.append(buf, *len);
   } else {
     if (*len < 0)
       Fatal("read: %s", strerror(errno));
@@ -321,8 +321,8 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       const size_t buf_size = 4 << 10;
       buf = (char*) malloc(buf_size);
       ssize_t len = 0;
-      (*i)->OnPipeReadyBuf(&buf, buf_size, &len);
-      SubprocessOutput((const char*) (*i)->line_prefix, (const char**) &buf, (size_t) len);
+      (*i)->OnPipeReadyBuf(buf, buf_size, &len);
+      SubprocessOutput((*i)->line_prefix, buf, (size_t) len); // FIXME segfault
       free(buf);
       buf = NULL;
 
