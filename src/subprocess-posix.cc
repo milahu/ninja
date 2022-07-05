@@ -144,6 +144,7 @@ void Subprocess::OnPipeReady() {
   if (len > 0) {
     buf_.append(buf, len);
     //SubprocessOutput(line_prefix, buf, len); // wrong.
+    SubprocessOutput("ninja child 1234: ", buf, len); // wrong.
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));
@@ -315,7 +316,8 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       continue;
     assert(fd == fds[cur_nfd].fd);
     if (fds[cur_nfd++].revents) {
-      //(*i)->OnPipeReady();
+      (*i)->OnPipeReady();
+      /*
       // TODO live output?
       char* buf;
       const size_t buf_size = 4 << 10;
@@ -325,6 +327,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       SubprocessOutput((*i)->line_prefix, buf, (size_t) len); // FIXME
       free(buf);
       buf = NULL;
+      */
 
       if ((*i)->Done()) {
         finished_.push(*i);
