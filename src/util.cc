@@ -118,17 +118,25 @@ void Info(const char* msg, ...) {
 
 void SubprocessOutput(char* line_prefix, char* buf, size_t len) {
   if (len == 0) return;
-  printf("SubprocessOutput: len = %i\n", len);
-  puts(line_prefix);
+  //printf("SubprocessOutput: len = %li\n", len);
+  fprintf(stderr, "SubprocessOutput: len = %li\n", len);
+  //puts(line_prefix);
+  fputs(line_prefix, stderr);
   for (size_t i = 0; i < len; i++) {
-    printf("SubprocessOutput: buf[%i] = int %i = char '%c'\n", i, (int) buf[i], buf[i]);
-    putchar(buf[i]);
+    //printf("SubprocessOutput: buf[%i] = int %i = char '%c'\n", i, (int) buf[i], buf[i]);
+    //putchar(buf[i]); // stdout
+    //putc(buf[i], stderr);
+    fputc(buf[i], stderr);
     if (buf[i] == '\n') {
-      printf("SubprocessOutput: end of line\n");
-      puts(line_prefix);
+      //printf("SubprocessOutput: end of line\n");
+      //puts(line_prefix);
+      fputs(line_prefix, stderr);
     }
   }
-  if (buf[(len - 1)] != '\n') putchar('\n');
+  if (buf[(len - 1)] != '\n') {
+    //putchar('\n');
+    fputc('\n', stderr);
+  }
 }
 
 void CanonicalizePath(string* path, uint64_t* slash_bits) {
