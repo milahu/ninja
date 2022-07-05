@@ -152,7 +152,7 @@ void Subprocess::OnPipeReady() {
   }
 }
 
-void Subprocess::OnPipeReadyBuf(char** buf, size_t buf_size, size_t* len) {
+void Subprocess::OnPipeReadyBuf(char** buf, size_t buf_size, ssize_t* len) {
   *len = read(fd_, *buf, buf_size);
   if (*len > 0) {
     buf_.append(*buf, *len);
@@ -317,7 +317,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       char *buf;
       const size_t buf_size = 4 << 10;
       buf = malloc(buf_size);
-      size_t len = 0;
+      ssize_t len = 0;
       (*i)->OnPipeReadyBuf(&buf, buf_size, &len);
       SubprocessOutput((*i)->line_prefix, buf, len); // TODO test
       free(buf);
