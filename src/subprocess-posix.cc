@@ -134,17 +134,20 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
 
   //assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
   //assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
+  // line_prefix prints garbage ... just why?
   int bytes_written = 0;
-  bytes_written = snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
+  //bytes_written = snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
   //fprintf(stderr, "Subprocess::Start: bytes_written = %i\n", bytes_written);
-  fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
+  //fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
 
   line_prefix_ptr = (char*) malloc(SUBPROCESS_LINE_PREFIX_SIZE);
-  bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
+  bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "ninja worker %d: ", pid_);
   //fprintf(stderr, "Subprocess::Start: bytes_written ptr = %i\n", bytes_written);
-  fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", line_prefix_ptr);
+  //fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", line_prefix_ptr);
 
-  close(output_pipe[1]);
+  fprintf(stderr, "ninja worker %i: starting\n", pid_);
+
+  close(output_pipe[1]); // TODO(milahu) what is closed here?
   return true;
 }
 
@@ -152,11 +155,12 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
 void Subprocess::OnPipeReady() {
   char buf[4 << 10];
   ssize_t len = read(fd_, buf, sizeof(buf));
+  fprintf(stderr, "Subprocess::OnPipeReady: len = %li\n", len);
   if (len > 0) {
     buf_.append(buf, len);
-    fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix);
-    fprintf(stderr, "Subprocess::OnPipeReady: line_prefix_ptr = '%s'\n", line_prefix_ptr);
-    //SubprocessOutput(line_prefix, buf, len); // bug in line_prefix
+    //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix); // ok
+    //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix_ptr = '%s'\n", line_prefix_ptr); // ok
+    //SubprocessOutput(line_prefix, buf, len); // prints garbage from line_prefix. wtf?
     //SubprocessOutput("ninja child 1234: ", buf, len); // ok
     SubprocessOutput(line_prefix_ptr, buf, len); // ok
   } else {
@@ -292,7 +296,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
   vector<pollfd> fds;
   nfds_t nfds = 0;
 
-  fprintf(stderr, "Subprocess::DoWork\n");
+  //fprintf(stderr, "Subprocess::DoWork\n");
 
   for (vector<Subprocess*>::iterator i = running_.begin();
        i != running_.end(); ++i) {
@@ -304,7 +308,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     ++nfds;
   }
 
-  fprintf(stderr, "Subprocess::DoWork 2\n");
+  //fprintf(stderr, "Subprocess::DoWork 2\n");
 
   if (tokens) {
     pollfd pfd = { tokens->GetMonitorFd(), POLLIN | POLLPRI, 0 };
@@ -312,7 +316,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     ++nfds;
   }
 
-  fprintf(stderr, "Subprocess::DoWork 3\n");
+  //fprintf(stderr, "Subprocess::DoWork 3\n");
 
   interrupted_ = 0;
   int ret = ppoll(&fds.front(), nfds, NULL, &old_mask_);
@@ -324,13 +328,13 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     return IsInterrupted();
   }
 
-  fprintf(stderr, "Subprocess::DoWork 4\n");
+  //fprintf(stderr, "Subprocess::DoWork 4\n");
 
   HandlePendingInterruption();
   if (IsInterrupted())
     return true;
 
-  fprintf(stderr, "Subprocess::DoWork 5\n");
+  //fprintf(stderr, "Subprocess::DoWork 5\n");
 
   nfds_t cur_nfd = 0;
   for (vector<Subprocess*>::iterator i = running_.begin();
@@ -340,7 +344,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       continue;
     assert(fd == fds[cur_nfd].fd);
     if (fds[cur_nfd++].revents) {
-      fprintf(stderr, "Subprocess::DoWork 5a: pid %i: OnPipeReady\n", (*i)->pid_);
+      //fprintf(stderr, "Subprocess::DoWork 5a: pid %i: OnPipeReady\n", (*i)->pid_);
       (*i)->OnPipeReady();
       /*
       // TODO live output?
@@ -363,7 +367,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     ++i;
   }
 
-  fprintf(stderr, "Subprocess::DoWork 6\n");
+  //fprintf(stderr, "Subprocess::DoWork 6\n");
 
   if (tokens) {
     pollfd *pfd = &fds[nfds - 1];
@@ -374,7 +378,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     }
   }
 
-  fprintf(stderr, "Subprocess::DoWork 7\n");
+  //fprintf(stderr, "Subprocess::DoWork 7\n");
 
   return IsInterrupted();
 }

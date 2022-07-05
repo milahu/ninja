@@ -120,10 +120,11 @@ void SubprocessOutput(char* line_prefix, char* buf, size_t len) {
   if (len == 0) return;
   fputc('\n', stderr);
   //printf("SubprocessOutput: len = %li\n", len);
-  fprintf(stderr, "SubprocessOutput: len = %li\n", len);
+  //fprintf(stderr, "SubprocessOutput: len = %li\n", len);
   //puts(line_prefix);
   fputs(line_prefix, stderr);
-  for (size_t i = 0; i < len; i++) {
+  //for (size_t i = 0; i < len; i++) {
+  for (size_t i = 0; i < (len - 1); i++) { // all except last char
     //printf("SubprocessOutput: buf[%i] = int %i = char '%c'\n", i, (int) buf[i], buf[i]);
     //putchar(buf[i]); // stdout
     //putc(buf[i], stderr);
@@ -134,6 +135,7 @@ void SubprocessOutput(char* line_prefix, char* buf, size_t len) {
       fputs(line_prefix, stderr);
     }
   }
+  fputc(buf[(len - 1)], stderr); // last char. avoid printing extra line_prefix
   if (buf[(len - 1)] != '\n') {
     //putchar('\n');
     fputc('\n', stderr);
