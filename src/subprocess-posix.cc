@@ -201,9 +201,12 @@ const string& Subprocess::GetOutput() const {
   return buf_;
 }
 
+/*
+// TODO?
 const string& Subprocess::GetLiveOutput() const {
   return buf_;
 }
+*/
 
 int SubprocessSet::interrupted_;
 
