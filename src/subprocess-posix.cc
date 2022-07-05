@@ -38,6 +38,7 @@ extern char** environ;
 
 using namespace std;
 
+// use_console = nested ninja process = ninja calls ninja
 Subprocess::Subprocess(bool use_console) : fd_(-1), pid_(-1),
                                            use_console_(use_console) {
 }
@@ -54,7 +55,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   int output_pipe[2];
   if (pipe(output_pipe) < 0)
     Fatal("pipe: %s", strerror(errno));
-  fd_ = output_pipe[0];
+  fd_ = output_pipe[0]; // read from output_pipe[0]
 #if !defined(USE_PPOLL)
   // If available, we use ppoll in DoWork(); otherwise we use pselect
   // and so must avoid overly-large FDs.
@@ -68,6 +69,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   if (err != 0)
     Fatal("posix_spawn_file_actions_init: %s", strerror(err));
 
+  // TODO(milahu) what is addclose?
   err = posix_spawn_file_actions_addclose(&action, output_pipe[0]);
   if (err != 0)
     Fatal("posix_spawn_file_actions_addclose: %s", strerror(err));
@@ -99,17 +101,25 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
       Fatal("posix_spawn_file_actions_addopen: %s", strerror(err));
     }
 
+    // write stdout + stderr to output_pipe[1]
+    // duplicate output_pipe[1] so we can close(output_pipe[1])
     err = posix_spawn_file_actions_adddup2(&action, output_pipe[1], 1);
     if (err != 0)
       Fatal("posix_spawn_file_actions_adddup2: %s", strerror(err));
+
     err = posix_spawn_file_actions_adddup2(&action, output_pipe[1], 2);
     if (err != 0)
       Fatal("posix_spawn_file_actions_adddup2: %s", strerror(err));
+
+    // TODO(milahu) what is addclose?
+    // close output_pipe[1] when subprocess done?
     err = posix_spawn_file_actions_addclose(&action, output_pipe[1]);
     if (err != 0)
       Fatal("posix_spawn_file_actions_addclose: %s", strerror(err));
     // In the console case, output_pipe is still inherited by the child and
     // closed when the subprocess finishes, which then notifies ninja.
+
+    // TODO(milahu) live output, before "subprocess ... notifies ninja"
   }
 #ifdef POSIX_SPAWN_USEVFORK
   flags |= POSIX_SPAWN_USEVFORK;
@@ -119,6 +129,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   if (err != 0)
     Fatal("posix_spawnattr_setflags: %s", strerror(err));
 
+  // start the subprocess
   const char* spawned_args[] = { "/bin/sh", "-c", command.c_str(), NULL };
   err = posix_spawn(&pid_, "/bin/sh", &action, &attr,
         const_cast<char**>(spawned_args), environ);
@@ -147,7 +158,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
 
   //fprintf(stderr, "ninja worker %i: starting\n", pid_);
 
-  close(output_pipe[1]); // TODO(milahu) what is closed here?
+  close(output_pipe[1]);
   return true;
 }
 
@@ -157,12 +168,16 @@ void Subprocess::OnPipeReady() {
   ssize_t len = read(fd_, buf, sizeof(buf));
   //fprintf(stderr, "Subprocess::OnPipeReady: len = %li\n", len);
   if (len > 0) {
-    buf_.append(buf, len);
-    //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix); // ok
-    //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix_ptr = '%s'\n", line_prefix_ptr); // ok
-    //SubprocessOutput(line_prefix, buf, len); // prints garbage from line_prefix. wtf?
-    //SubprocessOutput("ninja child 1234: ", buf, len); // ok
-    SubprocessOutput(line_prefix_ptr, buf, len); // ok
+    // dont double print?
+    #if 0
+      buf_.append(buf, len);
+    #else
+      //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix); // ok
+      //fprintf(stderr, "Subprocess::OnPipeReady: line_prefix_ptr = '%s'\n", line_prefix_ptr); // ok
+      //SubprocessOutput(line_prefix, buf, len); // prints garbage from line_prefix. wtf?
+      //SubprocessOutput("ninja child 1234: ", buf, len); // ok
+      SubprocessOutput(line_prefix_ptr, buf, len); // ok
+    #endif
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));
