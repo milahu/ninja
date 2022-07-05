@@ -322,7 +322,7 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
       buf = (char*) malloc(buf_size);
       ssize_t len = 0;
       (*i)->OnPipeReadyBuf(&buf, buf_size, &len);
-      SubprocessOutput((*i)->line_prefix, buf, len); // TODO test
+      SubprocessOutput((const char*) (*i)->line_prefix, (const char**) &buf, (size_t) len);
       free(buf);
       buf = NULL;
 
