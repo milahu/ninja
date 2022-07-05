@@ -121,8 +121,10 @@ void SubprocessOutput(char* line_prefix, char* buf, size_t len) {
   printf("SubprocessOutput: len = %i\n", len);
   puts(line_prefix);
   for (size_t i = 0; i < len; i++) {
+    printf("SubprocessOutput: buf[%i] = int %i = char '%c'\n", i, (int) buf[i], buf[i]);
     putchar(buf[i]);
     if (buf[i] == '\n') {
+      printf("SubprocessOutput: end of line\n");
       puts(line_prefix);
     }
   }
