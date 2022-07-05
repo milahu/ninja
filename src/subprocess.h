@@ -35,6 +35,8 @@
 
 #include "exit_status.h"
 
+#include "oprefixstream.h"
+
 /// Subprocess wraps a single async subprocess.  It is entirely
 /// passive: it expects the caller to notify it when its fds are ready
 /// for reading, as well as call Finish() to reap the child once done()
@@ -56,6 +58,8 @@ struct Subprocess {
   void OnPipeReady();
 
   std::string buf_;
+
+  oprefixstream *liveoutput_;
 
 #ifdef _WIN32
   /// Set up pipe_ as the parent-side pipe of the subprocess; return the
