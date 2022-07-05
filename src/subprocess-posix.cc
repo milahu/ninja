@@ -287,7 +287,11 @@ Subprocess *SubprocessSet::Add(const string& command, bool use_console) {
     delete subprocess;
     return 0;
   }
-  fprintf(stderr, "SubprocessSet::Add: pid %i: use_console = %s\n", subprocess->pid_, use_console);
+  //fprintf(stderr, "SubprocessSet::Add: pid %i: use_console = %i\n", subprocess->pid_, use_console);
+  // always 0?
+  if (use_console == true) {
+    fprintf(stderr, "SubprocessSet::Add: pid %i: use_console = %i\n", subprocess->pid_, use_console);
+  }
   running_.push_back(subprocess);
   return subprocess;
 }
