@@ -125,7 +125,7 @@ void SubprocessOutput(const char* line_prefix, const char** buf, size_t len) {
       puts(line_prefix);
     }
   }
-  if (*buf[(len - 1)] != '\n') putchar('\n');
+  //if (*buf[(len - 1)] != '\n') putchar('\n'); // FIXME segfault?
 }
 
 void CanonicalizePath(string* path, uint64_t* slash_bits) {
