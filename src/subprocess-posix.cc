@@ -151,13 +151,13 @@ void Subprocess::OnPipeReady() {
   }
 }
 
-void Subprocess::OnPipeReadyBuf(char *buf, size_t buf_len, size_t *len) {
-  *len = read(fd_, buf, buf_len);
-  if (len > 0) {
-    buf_.append(buf, len);
-    //SubprocessOutput(line_prefix, buf, len); // wrong. prints garbage
+void Subprocess::OnPipeReadyBuf(char **buf, size_t buf_len, size_t *len) {
+  *len = read(fd_, *buf, buf_len);
+  if (*len > 0) {
+    buf_.append(*buf, *len);
+    //SubprocessOutput(line_prefix, *buf, *len); // wrong. prints garbage
   } else {
-    if (len < 0)
+    if (*len < 0)
       Fatal("read: %s", strerror(errno));
     close(fd_);
     fd_ = -1;
