@@ -52,6 +52,11 @@ struct Subprocess {
 
   const std::string& GetOutput() const;
 
+  char line_prefix[SUBPROCESS_LINE_PREFIX_SIZE];
+  // 31 bytes + \0
+  // '1234567890123456789012345678901'
+  // 'pid xxxxxxxxxxxx: '
+
  private:
   Subprocess(bool use_console);
   bool Start(struct SubprocessSet* set, const std::string& command);
@@ -59,11 +64,6 @@ struct Subprocess {
   void OnPipeReadyBuf(char* buf, size_t buf_size, ssize_t* len);
 
   std::string buf_;
-
-  char line_prefix[SUBPROCESS_LINE_PREFIX_SIZE];
-  // 31 bytes + \0
-  // '1234567890123456789012345678901'
-  // 'pid xxxxxxxxxxxx: '
 
 #ifdef _WIN32
   /// Set up pipe_ as the parent-side pipe of the subprocess; return the

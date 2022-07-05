@@ -133,7 +133,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
     Fatal("posix_spawn_file_actions_destroy: %s", strerror(err));
 
   //assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
-  assert(snprintf(&line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
+  assert(snprintf(line_prefix, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_) < SUBPROCESS_LINE_PREFIX_SIZE);
   fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
 
   close(output_pipe[1]);
