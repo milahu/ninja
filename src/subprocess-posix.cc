@@ -152,7 +152,7 @@ void Subprocess::OnPipeReady() {
 }
 
 void Subprocess::OnPipeReadyBuf(char *buf, size_t buf_len, size_t *len) {
-  ssize_t len = read(fd_, buf, buf_len);
+  *len = read(fd_, buf, buf_len);
   if (len > 0) {
     buf_.append(buf, len);
     //SubprocessOutput(line_prefix, buf, len); // wrong. prints garbage
