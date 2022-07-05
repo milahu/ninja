@@ -139,10 +139,10 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   fprintf(stderr, "Subprocess::Start: bytes_written = %i\n", bytes_written);
   fprintf(stderr, "Subprocess::Start: line_prefix = '%s'\n", line_prefix);
 
-  *line_prefix_ptr = (char*) malloc(SUBPROCESS_LINE_PREFIX_SIZE);
-  bytes_written = snprintf(*line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
+  line_prefix_ptr = (char*) malloc(SUBPROCESS_LINE_PREFIX_SIZE);
+  bytes_written = snprintf(line_prefix_ptr, SUBPROCESS_LINE_PREFIX_SIZE, "pid %d: ", pid_);
   fprintf(stderr, "Subprocess::Start: bytes_written ptr = %i\n", bytes_written);
-  fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", *line_prefix_ptr);
+  fprintf(stderr, "Subprocess::Start: line_prefix ptr = '%s'\n", line_prefix_ptr);
 
   close(output_pipe[1]);
   return true;
@@ -154,8 +154,10 @@ void Subprocess::OnPipeReady() {
   if (len > 0) {
     buf_.append(buf, len);
     fprintf(stderr, "Subprocess::OnPipeReady: line_prefix = '%s'\n", line_prefix);
+    fprintf(stderr, "Subprocess::OnPipeReady: line_prefix_ptr = '%s'\n", line_prefix_ptr);
     //SubprocessOutput(line_prefix, buf, len); // bug in line_prefix
-    SubprocessOutput("ninja child 1234: ", buf, len); // ok
+    //SubprocessOutput("ninja child 1234: ", buf, len); // ok
+    SubprocessOutput(line_prefix_ptr, buf, len); // ok
   } else {
     if (len < 0)
       Fatal("read: %s", strerror(errno));
