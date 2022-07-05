@@ -118,6 +118,7 @@ void Info(const char* msg, ...) {
 
 void SubprocessOutput(char* line_prefix, char* buf, size_t len) {
   if (len == 0) return;
+  printf("SubprocessOutput: len = %i\n", len);
   puts(line_prefix);
   for (size_t i = 0; i < len; i++) {
     putchar(buf[i]);
