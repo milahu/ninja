@@ -58,7 +58,7 @@ struct Subprocess {
   // 'pid xxxxxxxxxxxx: '
   char* line_prefix_ptr;
 
- private:
+ //private: // TODO restore
   Subprocess(bool use_console);
   bool Start(struct SubprocessSet* set, const std::string& command);
   void OnPipeReady();
