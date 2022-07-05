@@ -317,9 +317,9 @@ bool SubprocessSet::DoWork(TokenPool* tokens) {
     if (fds[cur_nfd++].revents) {
       //(*i)->OnPipeReady();
       // TODO live output?
-      char *buf;
+      char* buf;
       const size_t buf_size = 4 << 10;
-      buf = malloc(buf_size);
+      buf = (char*) malloc(buf_size);
       ssize_t len = 0;
       (*i)->OnPipeReadyBuf(&buf, buf_size, &len);
       SubprocessOutput((*i)->line_prefix, buf, len); // TODO test
